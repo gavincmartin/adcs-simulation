@@ -12,10 +12,10 @@ def angular_velocity_derivative(J, w, M_list):
     Returns:
         [type]: [description]
     """
-    M_total = np.sum(M_list, axis=0)
-    J_inv = np.linalg.inv(J)
-    if M_total == 0:
-        return -np.matmul(J_inv, np.cross(w, np.matmul(J, w)))
+    if len(M_list) == 0:
+        M_total = np.array([0, 0, 0])
     else:
-        return (-np.matmul(J_inv, np.cross(w, np.matmul(J, w))) +
-                np.matmul(J_inv, M_total))
+        M_total = np.sum(M_list, axis=0)
+    J_inv = np.linalg.inv(J)
+    return (-np.matmul(J_inv, np.cross(w, np.matmul(J, w))) +
+            np.matmul(J_inv, M_total))
