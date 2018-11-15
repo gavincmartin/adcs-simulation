@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.stats import norm
 
 
 def quaternion_multiply(q1, q2):
@@ -116,3 +117,10 @@ def normalize(vector):
         numpy ndarray: the normalized vector
     """
     return vector / np.linalg.norm(vector)
+
+# TODO: figure out what the stddev value should be for a given sensor/actuator
+def apply_noise(value, stddev_frac=0.01):
+    mean = value
+    stddev = mean * stddev_frac
+    distribution_func = norm(loc=value, scale=stddev)
+    return distribution_func.rvs(size=1)
