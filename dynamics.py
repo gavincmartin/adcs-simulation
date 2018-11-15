@@ -1,4 +1,5 @@
 import numpy as np
+from math_utils import cross
 
 
 def angular_velocity_derivative(J, w, M_list):
@@ -17,5 +18,5 @@ def angular_velocity_derivative(J, w, M_list):
     else:
         M_total = np.sum(M_list, axis=0)
     J_inv = np.linalg.inv(J)
-    return (-np.matmul(J_inv, np.cross(w, np.matmul(J, w))) +
+    return (-np.matmul(J_inv, cross(w, np.matmul(J, w))) +
             np.matmul(J_inv, M_total))

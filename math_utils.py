@@ -14,7 +14,7 @@ def quaternion_multiply(q1, q2):
     """
 
     q3 = np.empty((4, ))
-    q3[0:3] = q1[3] * q2[0:3] + q2[3] * q1[0:3] - np.cross(q1[0:3], q2[0:3])
+    q3[0:3] = q1[3] * q2[0:3] + q2[3] * q1[0:3] - cross(q1[0:3], q2[0:3])
     q3[3] = q1[3] * q2[3] - np.dot(q1[0:3], q2[0:3])
     return q3
 
@@ -124,3 +124,35 @@ def apply_noise(value, stddev_frac=0.01):
     stddev = mean * stddev_frac
     distribution_func = norm(loc=value, scale=stddev)
     return distribution_func.rvs(size=1)
+
+def cross(v1, v2):
+    """Computes the cross product of two vectors
+    
+    NOTE: this function only exists because it outperforms numpy's 
+          cross function for small vectors. Using it enables a ~2x speedup
+          of the overall simulation
+
+    Args:
+        v1 (numpy ndarray): an Nx1 vector
+        v2 (numpy ndarray): an Nx1 vector
+    
+    Returns:
+        numpy ndarray: the cross product of the input vectors
+    """
+
+    v1_skew = skew_symmetric(v1)
+    return np.matmul(v1_skew, v2)
+
+def skew_symmetric(v):
+    """Returns a skew-symmetric matrix for the input vector
+    
+    Args:
+        v (numpy ndarray): an Nx1 vector
+    
+    Returns:
+        numpy ndarray: the skew-symmetric form of the vector (for purposes of cross-product computation)
+    """
+
+    return np.array([[0, -v[2], v[1]],
+                     [v[2], 0, -v[0]],
+                     [-v[1], v[0], 0]])

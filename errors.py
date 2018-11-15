@@ -1,5 +1,5 @@
 import numpy as np
-from math_utils import quaternion_multiply
+from math_utils import quaternion_multiply, cross
 
 
 def calculate_attitude_error(q_desired, q_current):
@@ -30,5 +30,5 @@ def calculate_attitude_rate_error(w_desired, w_current, attitude_err):
         attitude_rate_error: the attitude rate error (3x1) of the system at the given time
     """
     delta_w = w_current - w_desired
-    attitude_rate_err = -np.cross(w_current, attitude_err) + delta_w
+    attitude_rate_err = -cross(w_current, attitude_err) + delta_w
     return attitude_rate_err
