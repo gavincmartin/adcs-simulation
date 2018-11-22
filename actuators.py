@@ -75,7 +75,7 @@ class Actuators(object):
               of many individual `rvs` calls and (2) ensure that all adaptive
               integrator steps in between user-defined steps use the same
               noise value (so that the dynamics are not constantly changing).
-              Without this, the integrator fails to move forwards in time.
+              Without this, the integrator fails to move forward in time.
               Therefore, a custom hash function is used to apply the same
               noise is necessary cases.
         
@@ -88,7 +88,6 @@ class Actuators(object):
         Returns:
             float: the value with some Gaussian noise applied
         """
-
         # randomly apply some noise, but use a cache so that each integrator-defined adaptive integration step
         # between user-defined integration steps uses the same noise value (otherwise the propagator fails)
         noise = self.noise_vals[int(t // delta_t) % len(self.noise_vals)]
