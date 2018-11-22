@@ -6,8 +6,10 @@ def quaternion_multiply(q1, q2):
     """Multiplies two quaternions and returns the result
 
     Args:
-        q1 (numpy ndarray): a right-handed quaternion (4x1) with the scalar part as the last entry
-        q2 (numpy ndarray): a right-handed quaternion (4x1) with the scalar part as the last entry
+        q1 (numpy ndarray): a right-handed quaternion (4x1) with the scalar
+            part as the last entry
+        q2 (numpy ndarray): a right-handed quaternion (4x1) with the scalar
+            part as the last entry
 
     Returns:
         numpy ndarray: the quaternion product of the quaternion multiplication
@@ -23,10 +25,12 @@ def quaternion_to_dcm(q):
     """Converts a quaternion to a Direction Cosine Matrix (DCM)
 
     Args:
-        q (numpy ndarray): a right-handed quaternion (4x1) with the scalar part as the last entry
+        q (numpy ndarray): a right-handed quaternion (4x1) with the scalar part
+            as the last entry
 
     Returns:
-        numpy ndarray: the equivalent (3x3) Direction Cosine Matrix for the attitude parameterized by the input quaternion
+        numpy ndarray: the equivalent (3x3) Direction Cosine Matrix for the
+            attitude parameterized by the input quaternion
     """
 
     q1, q2, q3, q4 = q
@@ -47,10 +51,12 @@ def dcm_to_quaternion(dcm):
     """Converts a Direction Cosine Matrix (DCM) to a quaternion
     
     Args:
-        dcm (numpy ndarray): a 3x3 transformation matrix that parameterizes the attitude of a satellite
+        dcm (numpy ndarray): a 3x3 transformation matrix that parameterizes the
+            attitude of a satellite
     
     Returns:
-        numpy ndarray: the equivalent right-handed quaternion (4x1) with the scalar part as the last entry
+        numpy ndarray: the equivalent right-handed quaternion (4x1) with the 
+            scalar part as the last entry
     """
 
     K = np.array([[
@@ -72,7 +78,7 @@ def dcm_to_quaternion(dcm):
 
 
 def t1_matrix(angle):
-    """Returns the transformation matrix of a rotation about the 1-axis for a given angle
+    """Returns the transformation matrix of a rotation about the 1-axis
     
     Args:
         angle (float): the angle of rotation about the axis (in radians)
@@ -80,11 +86,13 @@ def t1_matrix(angle):
     Returns:
         numpy ndarray: the transformation matrix for the rotation
     """
-    return np.array([[1, 0, 0], [0, np.cos(angle), np.sin(angle)], [0, -np.sin(angle), np.cos(angle)]])
+    return np.array([[1, 0, 0],
+                     [0, np.cos(angle), np.sin(angle)],
+                     [0, -np.sin(angle), np.cos(angle)]])
 
 
 def t2_matrix(angle):
-    """Returns the transformation matrix of a rotation about the 2-axis for a given angle
+    """Returns the transformation matrix of a rotation about the 2-axis
     
     Args:
         angle (float): the angle of rotation about the axis (in radians)
@@ -92,11 +100,13 @@ def t2_matrix(angle):
     Returns:
         numpy ndarray: the transformation matrix for the rotation
     """
-    return np.array([[np.cos(angle), 0, -np.sin(angle)], [0, 1, 0], [np.sin(angle), 0, np.cos(angle)]])
+    return np.array([[np.cos(angle), 0, -np.sin(angle)],
+                     [0, 1, 0],
+                     [np.sin(angle), 0, np.cos(angle)]])
 
 
 def t3_matrix(angle):
-    """Returns the transformation matrix of a rotation about the 3-axis for a given angle
+    """Returns the transformation matrix of a rotation about the 3-axis
     
     Args:
         angle (float): the angle of rotation about the axis (in radians)
@@ -104,7 +114,9 @@ def t3_matrix(angle):
     Returns:
         numpy ndarray: the transformation matrix for the rotation
     """
-    return np.array([[np.cos(angle), np.sin(angle), 0], [-np.sin(angle), np.cos(angle), 0], [0, 0, 1]])
+    return np.array([[np.cos(angle), np.sin(angle), 0],
+                     [-np.sin(angle), np.cos(angle), 0],
+                     [0, 0, 1]])
 
 
 def normalize(vector):
@@ -118,12 +130,6 @@ def normalize(vector):
     """
     return vector / np.linalg.norm(vector)
 
-# TODO: figure out what the stddev value should be for a given sensor/actuator
-def apply_noise(value, stddev_frac=0.01):
-    mean = value
-    stddev = mean * stddev_frac
-    distribution_func = norm(loc=value, scale=stddev)
-    return distribution_func.rvs(size=1)
 
 def cross(v1, v2):
     """Computes the cross product of two vectors
@@ -142,6 +148,7 @@ def cross(v1, v2):
 
     v1_skew = skew_symmetric(v1)
     return np.matmul(v1_skew, v2)
+
 
 def skew_symmetric(v):
     """Returns a skew-symmetric matrix for the input vector
