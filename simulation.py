@@ -59,7 +59,7 @@ def simulate_adcs(satellite,
                   delta_t=1,
                   stop_time=6000,
                   verbose=False):
-    """Simulates an attitude determination and control system
+    """Simulates an attitude determination and control system over a period of time
     
     Args:
         satellite (Spacecraft): the Spacecraft object that represents the
@@ -91,6 +91,8 @@ def simulate_adcs(satellite,
                 - times (numpy ndarray): the times of all associated data
                 - q_actual (numpy ndarray): actual quaternion
                 - w_actual (numpy ndarray): actual angular velocity
+                - w_rxwls (numpy ndarray): angular velocity of the reaction
+                    wheels
                 - q_estimated (numpy ndarray): estimated quaternion
                 - w_estimated (numpy ndarray): estimated angular velocity
                 - q_desired (numpy ndarray): desired quaternion
@@ -125,6 +127,7 @@ def simulate_adcs(satellite,
     times = np.empty((length, ))
     q_actual = np.empty((length, 4))
     w_actual = np.empty((length, 3))
+    w_rxwls = np.empty((length, 3))
     q_estimated = np.empty((length, 4))
     w_estimated = np.empty((length, 3))
     q_desired = np.empty((length, 4))
@@ -155,6 +158,7 @@ def simulate_adcs(satellite,
         times[i] = t
         q_actual[i] = q
         w_actual[i] = w
+        w_rxwls[i] = solver.y[7:10]
         q_estimated[i] = log["q_estimated"]
         w_estimated[i] = log["w_estimated"]
         q_desired[i] = log["q_desired"]
@@ -174,6 +178,7 @@ def simulate_adcs(satellite,
     results["times"] = times
     results["q_actual"] = q_actual
     results["w_actual"] = w_actual
+    results["w_rxwls"] = w_rxwls
     results["q_estimated"] = q_estimated
     results["w_estimated"] = w_estimated
     results["q_desired"] = q_desired
@@ -229,14 +234,14 @@ def simulate_estimation_and_control(t,
     """
     # get an attitude and angular velocity estimate from the sensors
     # q_estimated = satellite.sensors.estimate_attitude(q)
-    # w_estimated = sensors.estimate_angvel(w)
+    w_estimated = satellite.estimate_angular_velocity(t, delta_t)
     q_estimated = satellite.q
-    w_estimated = satellite.w
+    # w_estimated = satellite.w
 
     # compute the desired attitude and angular velocity
-    q_desired, w_desired = nominal_state_func(t, q_estimated, w_estimated)
+    q_desired, w_desired = nominal_state_func(t, satellite.q, satellite.w)
 
-    # calculate the errors between your desired and actual state
+    # calculate the errors between your desired and estimated state
     attitude_err, attitude_rate_err = errors_func(t, q_estimated, w_estimated,
                                                   q_desired, w_desired)
 

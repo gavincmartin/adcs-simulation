@@ -9,7 +9,7 @@ class Spacecraft(object):
                  J=np.diag([100, 100, 100]),
                  controller=PDController(
                      k_d=np.diag([.01, .01, .01]), k_p=np.diag([.1, .1, .1])),
-                 sensors=None,
+                 gyros=None,
                  actuators=Actuators(
                      rxwl_mass=14,
                      rxwl_radius=0.1845,
@@ -24,7 +24,9 @@ class Spacecraft(object):
             controller (PDController): the controller that will compute control
                 torques to meet desired pointing and angular velocity
                 requirements
-            sensors (---): ---
+            gyros (Gyros): an object that models gyroscopes and simulates
+                estimated angular velocity by introducing bias and noise to
+                angular velocity measurements
             actuators (Actuators): an object that stores reaction wheel state
                 and related methods; actually applies control torques generated
                 by the controller object
@@ -35,7 +37,7 @@ class Spacecraft(object):
         """
         self.J = J
         self.controller = controller
-        self.sensors = sensors
+        self.gyros = gyros
         self.actuators = actuators
         self.q = q
         self.w = w
@@ -80,3 +82,19 @@ class Spacecraft(object):
         if self.actuators is None:
             return np.array([0, 0, 0]), np.array([0, 0, 0])
         return self.actuators.apply_control_torques(M_ctrl, self.w, t, delta_t)
+
+    def estimate_angular_velocity(self, t, delta_t):
+        """Provides an estimated angular velocity (adding noise & bias to the actual)
+        
+        Args:
+            t (float): the current simulation time in seconds
+            delta_t (float): the time between user-defined integrator steps
+                (not the internal/adaptive integrator steps) in seconds
+        
+        Returns:
+            numpy ndarray: the estimated angular velocity in rad/s
+        """
+        if self.gyros is None:
+            return self.w
+        else:
+            return self.gyros.estimate_angular_velocity(self.w, t, delta_t)
