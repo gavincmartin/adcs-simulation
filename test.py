@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from errors import calculate_attitude_error, calculate_attitude_rate_error
 from spacecraft import Spacecraft
 from actuators import Actuators
+from sensors import Gyros
 from controller import PDController
 from math_utils import quaternion_multiply
 from simulation import simulate_adcs
@@ -17,7 +18,7 @@ def main():
 def no_control():
     J = np.diag([1000, 500, 600])
     controller = PDController(k_d=np.diag([0, 0, 0]), k_p=np.diag([0, 0, 0]))
-    sensors = None
+    gyros = Gyros(bias_stability=1, angular_random_walk=0.07)
     actuators = Actuators(
         rxwl_mass=14,
         rxwl_radius=0.1845,
@@ -52,7 +53,7 @@ def no_control():
         q_desired = quaternion_multiply(q_intermediate, q_0_nominal)
         return q_desired, w_nominal
 
-    satellite = Spacecraft(J, controller, sensors, actuators, q=q_0, w=w_0)
+    satellite = Spacecraft(J, controller, gyros, actuators, q=q_0, w=w_0)
 
     # # # # # # # # # # # # # #
     results = simulate_adcs(
@@ -115,12 +116,34 @@ def no_control():
     plt.legend()
     plt.show()
 
+    plt.figure(3)
+    plt.subplot(311)
+    plt.title("Evolution of Angular Velocity over Time (No Control)")
+    plt.plot(results["times"], results["w_actual"][:, 0], label="actual")
+    plt.plot(results["times"], results["w_estimated"][:, 0], label="estimated")
+    plt.ylabel("w_x (rad/s)")
+    plt.xlabel("Time (s)")
+    plt.legend()
+    plt.subplot(312)
+    plt.plot(results["times"], results["w_actual"][:, 1], label="actual")
+    plt.plot(results["times"], results["w_estimated"][:, 1], label="estimated")
+    plt.ylabel("w_y (rad/s)")
+    plt.xlabel("Time (s)")
+    plt.legend()
+    plt.subplot(313)
+    plt.plot(results["times"], results["w_actual"][:, 2], label="actual")
+    plt.plot(results["times"], results["w_estimated"][:, 2], label="estimated")
+    plt.ylabel("w_z (rad/s)")
+    plt.xlabel("Time (s)")
+    plt.legend()
+    plt.show()
+
 
 def control():
     J = np.diag([1000, 500, 600])
     controller = PDController(
         k_d=np.diag([.01, .01, .01]), k_p=np.diag([.1, .1, .1]))
-    sensors = None
+    gyros = Gyros(bias_stability=1, angular_random_walk=0.07)
     actuators = Actuators(
         rxwl_mass=14,
         rxwl_radius=369 / 1000 / 2,
@@ -155,7 +178,7 @@ def control():
         q_desired = quaternion_multiply(q_intermediate, q_0_nominal)
         return q_desired, w_nominal
 
-    satellite = Spacecraft(J, controller, sensors, actuators, q=q_0, w=w_0)
+    satellite = Spacecraft(J, controller, gyros, actuators, q=q_0, w=w_0)
 
     # # # # # # # # # # # # # #
     results = simulate_adcs(
@@ -218,12 +241,34 @@ def control():
     plt.legend()
     plt.show()
 
+    plt.figure(3)
+    plt.subplot(311)
+    plt.title("Evolution of Angular Velocity over Time (No Control)")
+    plt.plot(results["times"], results["w_actual"][:, 0], label="actual")
+    plt.plot(results["times"], results["w_estimated"][:, 0], label="estimated")
+    plt.ylabel("w_x (rad/s)")
+    plt.xlabel("Time (s)")
+    plt.legend()
+    plt.subplot(312)
+    plt.plot(results["times"], results["w_actual"][:, 1], label="actual")
+    plt.plot(results["times"], results["w_estimated"][:, 1], label="estimated")
+    plt.ylabel("w_y (rad/s)")
+    plt.xlabel("Time (s)")
+    plt.legend()
+    plt.subplot(313)
+    plt.plot(results["times"], results["w_actual"][:, 2], label="actual")
+    plt.plot(results["times"], results["w_estimated"][:, 2], label="estimated")
+    plt.ylabel("w_z (rad/s)")
+    plt.xlabel("Time (s)")
+    plt.legend()
+    plt.show()
+
 
 def control_w_noise():
     J = np.diag([1000, 500, 600])
     controller = PDController(
         k_d=np.diag([.01, .01, .01]), k_p=np.diag([.1, .1, .1]))
-    sensors = None
+    gyros = Gyros(bias_stability=1, angular_random_walk=0.07)
     actuators = Actuators(
         rxwl_mass=14,
         rxwl_radius=369 / 1000 / 2,
@@ -258,7 +303,7 @@ def control_w_noise():
         q_desired = quaternion_multiply(q_intermediate, q_0_nominal)
         return q_desired, w_nominal
 
-    satellite = Spacecraft(J, controller, sensors, actuators, q=q_0, w=w_0)
+    satellite = Spacecraft(J, controller, gyros, actuators, q=q_0, w=w_0)
 
     # # # # # # # # # # # # # #
     results = simulate_adcs(
@@ -320,6 +365,28 @@ def control_w_noise():
     plt.subplot(313)
     plt.plot(results["times"], results["w_actual"][:, 2], label="actual")
     plt.plot(results["times"], results["w_desired"][:, 2], label="desired")
+    plt.ylabel("w_z (rad/s)")
+    plt.xlabel("Time (s)")
+    plt.legend()
+    plt.show()
+
+    plt.figure(3)
+    plt.subplot(311)
+    plt.title("Evolution of Angular Velocity over Time (No Control)")
+    plt.plot(results["times"], results["w_actual"][:, 0], label="actual")
+    plt.plot(results["times"], results["w_estimated"][:, 0], label="estimated")
+    plt.ylabel("w_x (rad/s)")
+    plt.xlabel("Time (s)")
+    plt.legend()
+    plt.subplot(312)
+    plt.plot(results["times"], results["w_actual"][:, 1], label="actual")
+    plt.plot(results["times"], results["w_estimated"][:, 1], label="estimated")
+    plt.ylabel("w_y (rad/s)")
+    plt.xlabel("Time (s)")
+    plt.legend()
+    plt.subplot(313)
+    plt.plot(results["times"], results["w_actual"][:, 2], label="actual")
+    plt.plot(results["times"], results["w_estimated"][:, 2], label="estimated")
     plt.ylabel("w_z (rad/s)")
     plt.xlabel("Time (s)")
     plt.legend()
