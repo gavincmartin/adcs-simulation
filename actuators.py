@@ -1,6 +1,6 @@
 import numpy as np
 from math_utils import cross
-from scipy.stats import norm, uniform
+from scipy.stats import norm
 
 
 class Actuators(object):
@@ -29,7 +29,11 @@ class Actuators(object):
         self.w_rxwls = w_rxwls
         self.rxwl_max_torque = rxwl_max_torque
         noise_func = norm(loc=0.0, scale=noise_factor)
-        self.noise_vals = noise_func.rvs(size=100000, random_state=123456)
+        self.noise_vals = np.array([
+            noise_func.rvs(size=100000),
+            noise_func.rvs(size=100000),
+            noise_func.rvs(size=100000)
+        ])
 
     def apply_control_torques(self, M_ctrl, w_sc, t, delta_t):
         """Applies the control torques to the modeled reaction wheels
@@ -60,14 +64,14 @@ class Actuators(object):
             abs(M_ctrl[2]), self.rxwl_max_torque)
 
         w_dot_rxwls = -cross(w_sc, self.w_rxwls) - 1 / self.C_w * M_ctrl_fixed
-        w_dot_rxwls[0] = self.add_noise(w_dot_rxwls[0], t, delta_t)
-        w_dot_rxwls[1] = self.add_noise(w_dot_rxwls[1], t, delta_t)
-        w_dot_rxwls[2] = self.add_noise(w_dot_rxwls[2], t, delta_t)
+        w_dot_rxwls[0] = self.add_noise(w_dot_rxwls[0], 0, t, delta_t)
+        w_dot_rxwls[1] = self.add_noise(w_dot_rxwls[1], 1, t, delta_t)
+        w_dot_rxwls[2] = self.add_noise(w_dot_rxwls[2], 2, t, delta_t)
         M_applied = -self.C_w * w_dot_rxwls - cross(w_sc,
                                                     self.C_w * self.w_rxwls)
         return M_applied, w_dot_rxwls
 
-    def add_noise(self, value, t, delta_t):
+    def add_noise(self, value, rxwl, t, delta_t):
         """Adds Gaussian noise to a given value
 
         NOTE: This method uses a cache of random values generated in this
@@ -81,6 +85,7 @@ class Actuators(object):
         
         Args:
             value (float): some value to be made noisier
+            rxwl (int): the rxwl number (0, 1, or 2)
             t (float): the current simulation time in seconds
             delta_t (float): the time between user-defined integrator steps
                 (not the internal/adaptive integrator steps) in seconds
@@ -90,5 +95,5 @@ class Actuators(object):
         """
         # randomly apply some noise, but use a cache so that each integrator-defined adaptive integration step
         # between user-defined integration steps uses the same noise value (otherwise the propagator fails)
-        noise = self.noise_vals[int(t // delta_t) % len(self.noise_vals)]
+        noise = self.noise_vals[rxwl, int(t // delta_t) % len(self.noise_vals)]
         return value * (1 + noise)
