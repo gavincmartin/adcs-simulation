@@ -95,5 +95,6 @@ class Actuators(object):
         """
         # randomly apply some noise, but use a cache so that each integrator-defined adaptive integration step
         # between user-defined integration steps uses the same noise value (otherwise the propagator fails)
-        noise = self.noise_vals[rxwl, int(t // delta_t) % len(self.noise_vals)]
+        noise = self.noise_vals[rxwl,
+                                int(t // delta_t) % len(self.noise_vals[rxwl])]
         return value * (1 + noise)
