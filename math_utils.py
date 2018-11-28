@@ -128,7 +128,10 @@ def normalize(vector):
     Returns:
         numpy ndarray: the normalized vector
     """
-    return vector / np.linalg.norm(vector)
+    mag = np.linalg.norm(vector)
+    if mag < np.finfo(np.float64).eps:
+        return np.zeros(vector.shape)
+    return vector / mag
 
 
 def cross(v1, v2):
@@ -163,3 +166,45 @@ def skew_symmetric(v):
     return np.array([[0, -v[2], v[1]],
                      [v[2], 0, -v[0]],
                      [-v[1], v[0], 0]])
+
+def triad(d_1_b, d_1_i, d_2_b, d_2_i):
+    """Uses TRIAD to get the DCM from inertial to body
+    
+    Args:
+        d_1_b (numpy ndarray): the first (better) direction measurement in body
+            coordinates (what your simulated sensors measure in the body frame)
+        d_1_i (numpy ndarray): the first (better) direction measurement in
+            inertial coordinates (what your model says the direction should be)
+        d_1_b (numpy ndarray): the second (worse) direction measurement in body
+            coordinates (what your simulated sensors measure in the body frame)
+        d_1_i (numpy ndarray): the second (worse) direction measurement in
+            inertial coordinates (what your model says the direction should be)
+    
+    Returns:
+        numpy ndarray: the 3x3 DCM representing the transformation from the 
+            inertial to body frame
+    """
+    x_b = normalize(d_1_b)
+    z_b = normalize(cross(d_1_b, d_2_b))
+    y_b = cross(z_b, x_b)
+
+    x_i = normalize(d_1_i)
+    z_i = normalize(cross(d_1_i, d_2_i))
+    y_i = cross(z_i, x_i)
+    T_i2b = np.matmul(np.column_stack([x_b, y_b, z_b]), np.stack([x_i, y_i, z_i]))
+    return T_i2b
+
+def get_DCM_i2NED(r):
+    """Computes the inertial to NED (North-East-Down) DCM
+    
+    Args:
+        r (numpy ndarray): inertial position
+    
+    Returns:
+        numpy ndarray: the 3x3 DCM representing the transformation from the 
+            inertial to NED frame
+    """
+    n_z_i = normalize(-r)
+    n_y_i = normalize(cross(n_z_i, np.array([0, 0, 1])))
+    n_x_i = cross(n_y_i, n_z_i)
+    return np.stack([n_x_i, n_y_i, n_z_i])
