@@ -1,5 +1,6 @@
 import numpy as np
-from math_utils import cross
+from math_utils import cross, triad, dcm_to_quaternion
+from sensor_models import compute_earth_direction, compute_local_magnetic_field
 from controller import PDController
 from actuators import Actuators
 
@@ -10,13 +11,17 @@ class Spacecraft(object):
                  controller=PDController(
                      k_d=np.diag([.01, .01, .01]), k_p=np.diag([.1, .1, .1])),
                  gyros=None,
+                 magnetometer=None,
+                 earth_horizon_sensor=None,
                  actuators=Actuators(
                      rxwl_mass=14,
                      rxwl_radius=0.1845,
                      rxwl_max_torque=0.68,
                      noise_factor=0.01),
                  q=np.array([0, 0, 0, 1]),
-                 w=np.array([0, 0, 0])):
+                 w=np.array([0, 0, 0]),
+                 r=np.array([0, 0, 0]),
+                 v=np.array([0, 0, 0])):
         """Constructs a Spacecraft object to store system objects, and state
         
         Args:
@@ -34,13 +39,19 @@ class Spacecraft(object):
                 the inertial to body frame) of the spacecraft (at a given time)
             w (numpy ndarray): the angular velocity (rad/s) (3x1) in body
                 coordinates of the spacecraft (at a given time)
+            r (numpy ndarray): the inertial position of the spacecraft (m)
+            v (numpy ndarray): the inertial velocity of the spacecraft (m/s)
         """
         self.J = J
         self.controller = controller
         self.gyros = gyros
+        self.magnetometer = magnetometer
+        self.earth_horizon_sensor = earth_horizon_sensor
         self.actuators = actuators
         self.q = q
         self.w = w
+        self.r = r
+        self.v = v
 
     def calculate_control_torques(self, attitude_err, attitude_rate_err):
         """Wrapper method for Controller.calculate_control_torques
@@ -98,3 +109,32 @@ class Spacecraft(object):
             return self.w
         else:
             return self.gyros.estimate_angular_velocity(self.w, t, delta_t)
+
+    def estimate_attitude(self, t, delta_t):
+        """Provides an estimated attitude (adding measurement noise to the actual)
+
+        This method uses the TRIAD algorithm to compute the attitude from
+        two direction measurements.
+        
+        Args:
+            t (float): the current simulation time in seconds
+            delta_t (float): the time between user-defined integrator steps
+                (not the internal/adaptive integrator steps) in seconds
+        
+        Returns:
+            numpy ndarray: the quaternion representing the attitude (from
+                the inertial to body frame) of the spacecraft (at a given time)
+        """
+        if self.magnetometer is None or self.earth_horizon_sensor is None:
+            return self.q
+        else:
+            d_earth_body = self.earth_horizon_sensor.estimate_earth_direction(
+                self.q, self.r, t, delta_t)
+            d_earth_inertial = compute_earth_direction(self.r)
+            B_body = self.magnetometer.estimate_magnetic_field(
+                self.q, self.r, t, delta_t)
+            B_inertial = compute_local_magnetic_field(self.r)
+            T_estimated = triad(d_earth_body, d_earth_inertial, B_body,
+                                B_inertial)
+            q_estimated = dcm_to_quaternion(T_estimated)
+            return q_estimated

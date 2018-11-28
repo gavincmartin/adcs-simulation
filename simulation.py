@@ -3,10 +3,11 @@ from scipy.integrate import ode, RK45, odeint
 from kinematics import quaternion_derivative
 from dynamics import angular_velocity_derivative
 from math_utils import normalize
+from errors import calculate_attitude_error, calculate_attitude_rate_error
 
 
-def derivatives_func(t, x, satellite, errors_func, nominal_state_func,
-                     perturbations_func, delta_t):
+def derivatives_func(t, x, satellite, nominal_state_func, perturbations_func,
+                     position_velocity_func, delta_t):
     """Computes the derivative of the spacecraft state
     
     Args:
@@ -17,28 +18,30 @@ def derivatives_func(t, x, satellite, errors_func, nominal_state_func,
             [7, 8, 9]: the angular velocities of the reaction wheels
         satellite (Spacecraft): the Spacecraft object that represents the
             satellite being modeled
-        errors_func (function): the function that should compute the attitude
-            error and attitude rate errors; its header must be (t, q_estimated,
-            w_estimated, q_desired, w_desired)
         nominal_state_func (function): the function that should compute the
             nominal attitude and angular velocity; its header must be (t, q, w)
         perturbations_func (function): the function that should compute the
             perturbation torques (N * m); its header must be (t, q, w)
+        position_velocity_func (function): the function that should compute
+            the position and velocity; its header must be (t)
         delta_t (float): the time between user-defined integrator steps
                 (not the internal/adaptive integrator steps) in seconds
     
     Returns:
         numpy ndarray: the derivative of the state (10x1) with respect to time
     """
+    r, v = position_velocity_func(t)
     satellite.q = normalize(x[0:4])
     satellite.w = x[4:7]
+    satellite.r = r
+    satellite.v = v
     # only set if the satellite has actuators
     try:
         satellite.actuators.w_rxwls = x[7:10]
     except AttributeError:
         pass
     M_applied, w_dot_rxwls, _ = simulate_estimation_and_control(
-        t, satellite, errors_func, nominal_state_func, delta_t)
+        t, satellite, nominal_state_func, delta_t)
 
     # calculate the perturbing torques on the satellite
     M_perturb = perturbations_func(t, satellite.q, satellite.w)
@@ -52,9 +55,9 @@ def derivatives_func(t, x, satellite, errors_func, nominal_state_func,
 
 
 def simulate_adcs(satellite,
-                  errors_func,
                   nominal_state_func,
                   perturbations_func,
+                  position_velocity_func,
                   start_time=0,
                   delta_t=1,
                   stop_time=6000,
@@ -64,13 +67,12 @@ def simulate_adcs(satellite,
     Args:
         satellite (Spacecraft): the Spacecraft object that represents the
             satellite being modeled
-        errors_func (function): the function that should compute the attitude
-            error and attitude rate errors; its header must be (t, q_estimated,
-            w_estimated, q_desired, w_desired)
         nominal_state_func (function): the function that should compute the
             nominal attitude and angular velocity; its header must be (t, q, w)
         perturbations_func (function): the function that should compute the
             perturbation torques (N * m); its header must be (t, q, w)
+        position_velocity_func (function): the function that should compute
+            the position and velocity; its header must be (t)
         verbose (bool, optional): Defaults to False. [description]
         start_time (float, optional): Defaults to 0. The start time of the
             simulation in seconds
@@ -104,6 +106,8 @@ def simulate_adcs(satellite,
                 - w_dot_rxwls (numpy ndarray): angular acceleration of
                     reaction wheels
                 - M_perturb (numpy ndarray): sum of perturbation torques
+                - positions (numpy ndarray): inertial positions
+                - velocities (numpy ndarray): inertial velocities
 
     """
     try:
@@ -120,8 +124,8 @@ def simulate_adcs(satellite,
               1e-8),
         nsteps=10000)
     solver.set_initial_value(y=init_state, t=start_time)
-    solver.set_f_params(satellite, errors_func, nominal_state_func,
-                        perturbations_func, delta_t)
+    solver.set_f_params(satellite, nominal_state_func, perturbations_func,
+                        position_velocity_func, delta_t)
 
     length = int((stop_time - 0) / delta_t + 1)
     times = np.empty((length, ))
@@ -138,6 +142,8 @@ def simulate_adcs(satellite,
     M_applied = np.empty((length, 3))
     w_dot_rxwls = np.empty((length, 3))
     M_perturb = np.empty((length, 3))
+    positions = np.empty((length, 3))
+    velocities = np.empty((length, 3))
     i = 0
 
     if verbose:
@@ -151,10 +157,13 @@ def simulate_adcs(satellite,
         t = solver.t
         q = normalize(solver.y[0:4])
         w = solver.y[4:7]
+        r, v = position_velocity_func(t)
         satellite.q = q
         satellite.w = w
+        satellite.r = r
+        satellite.v = v
         _, _, log = simulate_estimation_and_control(
-            t, satellite, errors_func, nominal_state_func, delta_t, log=True)
+            t, satellite, nominal_state_func, delta_t, log=True)
         times[i] = t
         q_actual[i] = q
         w_actual[i] = w
@@ -169,6 +178,8 @@ def simulate_adcs(satellite,
         M_applied[i] = log["M_applied"]
         w_dot_rxwls[i] = log["w_dot_rxwls"]
         M_perturb[i] = perturbations_func(t, q, w)
+        positions[i] = r
+        velocities[i] = v
         i += 1
 
         # continue integrating
@@ -193,7 +204,6 @@ def simulate_adcs(satellite,
 
 def simulate_estimation_and_control(t,
                                     satellite,
-                                    errors_func,
                                     nominal_state_func,
                                     delta_t,
                                     log=False):
@@ -203,9 +213,6 @@ def simulate_estimation_and_control(t,
         t (float): the time (in seconds)
         satellite (Spacecraft): the Spacecraft object that represents the
             satellite being modeled
-        errors_func (function): the function that should compute the attitude
-            error and attitude rate errors; its header must be (t, q_estimated,
-            w_estimated, q_desired, w_desired)
         nominal_state_func (function): the function that should compute the
             nominal attitude and angular velocity; its header must be (t, q, w)
         perturbations_func (function): the function that should compute the
@@ -233,20 +240,20 @@ def simulate_estimation_and_control(t,
                     reaction wheels
     """
     # get an attitude and angular velocity estimate from the sensors
-    # q_estimated = satellite.sensors.estimate_attitude(q)
+    q_estimated = satellite.estimate_attitude(t, delta_t)
     w_estimated = satellite.estimate_angular_velocity(t, delta_t)
-    q_estimated = satellite.q
+    # q_estimated = satellite.q
     # w_estimated = satellite.w
 
     # compute the desired attitude and angular velocity
     q_desired, w_desired = nominal_state_func(t, satellite.q, satellite.w)
 
     # calculate the errors between your desired and estimated state
-    attitude_err, attitude_rate_err = errors_func(t, q_estimated, w_estimated,
-                                                  q_desired, w_desired)
+    attitude_err = calculate_attitude_error(q_desired, q_estimated)
+    attitude_rate_err = calculate_attitude_rate_error(w_desired, w_estimated,
+                                                      attitude_err)
 
     # determine the control torques necessary to change state
-    # print("time: {}".format(t))
     M_ctrl = satellite.calculate_control_torques(attitude_err,
                                                  attitude_rate_err)
 
