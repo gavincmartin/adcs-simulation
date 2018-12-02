@@ -19,7 +19,8 @@ def derivatives_func(t, x, satellite, nominal_state_func, perturbations_func,
         satellite (Spacecraft): the Spacecraft object that represents the
             satellite being modeled
         nominal_state_func (function): the function that should compute the
-            nominal attitude and angular velocity; its header must be (t, q, w)
+            nominal attitude (in DCM form) and angular velocity; its header
+            must be (t)
         perturbations_func (function): the function that should compute the
             perturbation torques (N * m); its header must be (t, q, w)
         position_velocity_func (function): the function that should compute
@@ -68,7 +69,8 @@ def simulate_adcs(satellite,
         satellite (Spacecraft): the Spacecraft object that represents the
             satellite being modeled
         nominal_state_func (function): the function that should compute the
-            nominal attitude and angular velocity; its header must be (t, q, w)
+            nominal attitude (in DCM form) and angular velocity; its header
+            must be (t)
         perturbations_func (function): the function that should compute the
             perturbation torques (N * m); its header must be (t, q, w)
         position_velocity_func (function): the function that should compute
@@ -95,10 +97,10 @@ def simulate_adcs(satellite,
                 - w_actual (numpy ndarray): actual angular velocity
                 - w_rxwls (numpy ndarray): angular velocity of the reaction
                     wheels
-                - q_estimated (numpy ndarray): estimated quaternion
+                - DCM_estimated (numpy ndarray): estimated DCM
                 - w_estimated (numpy ndarray): estimated angular velocity
-                - q_desired (numpy ndarray): desired quaternion
-                - q_desired (numpy ndarray): desired angular velocity
+                - DCM_desired (numpy ndarray): desired DCM
+                - w_desired (numpy ndarray): desired angular velocity
                 - attitude_err (numpy ndarray): attitude error
                 - attitude_rate_err (numpy ndarray): attitude rate error
                 - M_ctrl (numpy ndarray): control torque
@@ -132,9 +134,9 @@ def simulate_adcs(satellite,
     q_actual = np.empty((length, 4))
     w_actual = np.empty((length, 3))
     w_rxwls = np.empty((length, 3))
-    q_estimated = np.empty((length, 4))
+    DCM_estimated = np.empty((length, 3, 3))
     w_estimated = np.empty((length, 3))
-    q_desired = np.empty((length, 4))
+    DCM_desired = np.empty((length, 3, 3))
     w_desired = np.empty((length, 3))
     attitude_err = np.empty((length, 3))
     attitude_rate_err = np.empty((length, 3))
@@ -168,9 +170,9 @@ def simulate_adcs(satellite,
         q_actual[i] = q
         w_actual[i] = w
         w_rxwls[i] = solver.y[7:10]
-        q_estimated[i] = log["q_estimated"]
+        DCM_estimated[i] = log["DCM_estimated"]
         w_estimated[i] = log["w_estimated"]
-        q_desired[i] = log["q_desired"]
+        DCM_desired[i] = log["DCM_desired"]
         w_desired[i] = log["w_desired"]
         attitude_err[i] = log["attitude_err"]
         attitude_rate_err[i] = log["attitude_rate_err"]
@@ -190,9 +192,9 @@ def simulate_adcs(satellite,
     results["q_actual"] = q_actual
     results["w_actual"] = w_actual
     results["w_rxwls"] = w_rxwls
-    results["q_estimated"] = q_estimated
+    results["DCM_estimated"] = DCM_estimated
     results["w_estimated"] = w_estimated
-    results["q_desired"] = q_desired
+    results["DCM_desired"] = DCM_desired
     results["w_desired"] = w_desired
     results["attitude_err"] = attitude_err
     results["attitude_rate_err"] = attitude_rate_err
@@ -214,7 +216,8 @@ def simulate_estimation_and_control(t,
         satellite (Spacecraft): the Spacecraft object that represents the
             satellite being modeled
         nominal_state_func (function): the function that should compute the
-            nominal attitude and angular velocity; its header must be (t, q, w)
+            nominal attitude (in DCM form) and angular velocity; its header
+            must be (t)
         perturbations_func (function): the function that should compute the
             perturbation torques (N * m); its header must be (t, q, w)
         delta_t (float): the time between user-defined integrator steps
@@ -228,10 +231,10 @@ def simulate_estimation_and_control(t,
             applied to achieve the applied torque (rad/s^2)
         dict: a dictionary containing results logged for this simulation step;
             Contains:
-                - q_estimated (numpy ndarray): estimated quaternion
+                - DCM_estimated (numpy ndarray): estimated DCM
                 - w_estimated (numpy ndarray): estimated angular velocity
-                - q_desired (numpy ndarray): desired quaternion
-                - q_desired (numpy ndarray): desired angular velocity
+                - DCM_desired (numpy ndarray): desired DCM
+                - w_desired (numpy ndarray): desired angular velocity
                 - attitude_err (numpy ndarray): attitude error
                 - attitude_rate_err (numpy ndarray): attitude rate error
                 - M_ctrl (numpy ndarray): control torque
@@ -240,16 +243,14 @@ def simulate_estimation_and_control(t,
                     reaction wheels
     """
     # get an attitude and angular velocity estimate from the sensors
-    q_estimated = satellite.estimate_attitude(t, delta_t)
+    DCM_estimated = satellite.estimate_attitude(t, delta_t)
     w_estimated = satellite.estimate_angular_velocity(t, delta_t)
-    # q_estimated = satellite.q
-    # w_estimated = satellite.w
 
     # compute the desired attitude and angular velocity
-    q_desired, w_desired = nominal_state_func(t, satellite.q, satellite.w)
+    DCM_desired, w_desired = nominal_state_func(t)
 
     # calculate the errors between your desired and estimated state
-    attitude_err = calculate_attitude_error(q_desired, q_estimated)
+    attitude_err = calculate_attitude_error(DCM_desired, DCM_estimated)
     attitude_rate_err = calculate_attitude_rate_error(w_desired, w_estimated,
                                                       attitude_err)
 
@@ -263,9 +264,9 @@ def simulate_estimation_and_control(t,
 
     if log:
         logged_results = {
-            "q_estimated": q_estimated,
+            "DCM_estimated": DCM_estimated,
             "w_estimated": w_estimated,
-            "q_desired": q_desired,
+            "DCM_desired": DCM_desired,
             "w_desired": w_desired,
             "attitude_err": attitude_err,
             "attitude_rate_err": attitude_rate_err,

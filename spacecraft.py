@@ -122,7 +122,7 @@ class Spacecraft(object):
                 (not the internal/adaptive integrator steps) in seconds
         
         Returns:
-            numpy ndarray: the quaternion representing the attitude (from
+            numpy ndarray: the estimated DCM representing the attitude (from
                 the inertial to body frame) of the spacecraft (at a given time)
         """
         if self.magnetometer is None or self.earth_horizon_sensor is None:
@@ -136,5 +136,4 @@ class Spacecraft(object):
             B_inertial = compute_local_magnetic_field(self.r)
             T_estimated = triad(d_earth_body, d_earth_inertial, B_body,
                                 B_inertial)
-            q_estimated = dcm_to_quaternion(T_estimated)
-            return q_estimated
+            return T_estimated
