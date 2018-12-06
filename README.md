@@ -1,5 +1,7 @@
 # adcs-simulation
 
+![alt text](images/dcm_comparison.png "Uncontrolled vs Controlled Attitude Simulation Results")
+
 This modeling and simulation software is used to characterize the behavior of attitude determination and control systems (ADCS) on spacecraft, and allows for rapid iteration to demonstrate the viability of a specific suite of sensor, actuator, and controller designs for a given spacecraft design. The mathematical models used for all modeling are described in the accompanying [paper](final_project_paper.pdf).
 
 ## Running the Project
@@ -29,7 +31,7 @@ If there are issues with the dependencies not importing successfully, confirm th
 
 
 ## Software Documentation
-The Sphinx Python documentation generator was used to create HTML-based documentation for the code written here. For an overview of the project, it is suggested to start with the [modules](docs/modules.html) page (at docs/modules.html).
+The Sphinx Python documentation generator was used to create HTML-based documentation for the code written here. For an overview of the project, it is suggested to start with the [modules](https://gavincmartin.github.io/adcs-simulation/modules.html) page.
 
 
 This repository is a product of the ASE 372K (Attitude Dynamics) course final project.
