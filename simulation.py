@@ -6,55 +6,6 @@ from math_utils import normalize
 from errors import calculate_attitude_error, calculate_attitude_rate_error
 
 
-def derivatives_func(t, x, satellite, nominal_state_func, perturbations_func,
-                     position_velocity_func, delta_t):
-    """Computes the derivative of the spacecraft state
-    
-    Args:
-        t (float): the time (in seconds)
-        x (numpy ndarray): the state (10x1) where the elements are:
-            [0, 1, 2, 3]: the quaternion describing the spacecraft attitude
-            [4, 5, 6]: the angular velocity of the spacecraft
-            [7, 8, 9]: the angular velocities of the reaction wheels
-        satellite (Spacecraft): the Spacecraft object that represents the
-            satellite being modeled
-        nominal_state_func (function): the function that should compute the
-            nominal attitude (in DCM form) and angular velocity; its header
-            must be (t)
-        perturbations_func (function): the function that should compute the
-            perturbation torques (N * m); its header must be (t, q, w)
-        position_velocity_func (function): the function that should compute
-            the position and velocity; its header must be (t)
-        delta_t (float): the time between user-defined integrator steps
-                (not the internal/adaptive integrator steps) in seconds
-    
-    Returns:
-        numpy ndarray: the derivative of the state (10x1) with respect to time
-    """
-    r, v = position_velocity_func(t)
-    satellite.q = normalize(x[0:4])
-    satellite.w = x[4:7]
-    satellite.r = r
-    satellite.v = v
-    # only set if the satellite has actuators
-    try:
-        satellite.actuators.w_rxwls = x[7:10]
-    except AttributeError:
-        pass
-    M_applied, w_dot_rxwls, _ = simulate_estimation_and_control(
-        t, satellite, nominal_state_func, delta_t)
-
-    # calculate the perturbing torques on the satellite
-    M_perturb = perturbations_func(t, satellite.q, satellite.w)
-
-    dx = np.empty((10, ))
-    dx[0:4] = quaternion_derivative(satellite.q, satellite.w)
-    dx[4:7] = angular_velocity_derivative(satellite.J, satellite.w,
-                                          [M_applied, M_perturb])
-    dx[7:10] = w_dot_rxwls
-    return dx
-
-
 def simulate_adcs(satellite,
                   nominal_state_func,
                   perturbations_func,
@@ -72,7 +23,7 @@ def simulate_adcs(satellite,
             nominal attitude (in DCM form) and angular velocity; its header
             must be (t)
         perturbations_func (function): the function that should compute the
-            perturbation torques (N * m); its header must be (t, q, w)
+            perturbation torques (N * m); its header must be (satellite)
         position_velocity_func (function): the function that should compute
             the position and velocity; its header must be (t)
         verbose (bool, optional): Defaults to False. [description]
@@ -179,7 +130,7 @@ def simulate_adcs(satellite,
         M_ctrl[i] = log["M_ctrl"]
         M_applied[i] = log["M_applied"]
         w_dot_rxwls[i] = log["w_dot_rxwls"]
-        M_perturb[i] = perturbations_func(t, q, w)
+        M_perturb[i] = perturbations_func(satellite)
         positions[i] = r
         velocities[i] = v
         i += 1
@@ -202,6 +153,55 @@ def simulate_adcs(satellite,
     results["M_applied"] = M_applied
     results["M_perturb"] = M_perturb
     return results
+
+
+def derivatives_func(t, x, satellite, nominal_state_func, perturbations_func,
+                     position_velocity_func, delta_t):
+    """Computes the derivative of the spacecraft state
+    
+    Args:
+        t (float): the time (in seconds)
+        x (numpy ndarray): the state (10x1) where the elements are:
+            [0, 1, 2, 3]: the quaternion describing the spacecraft attitude
+            [4, 5, 6]: the angular velocity of the spacecraft
+            [7, 8, 9]: the angular velocities of the reaction wheels
+        satellite (Spacecraft): the Spacecraft object that represents the
+            satellite being modeled
+        nominal_state_func (function): the function that should compute the
+            nominal attitude (in DCM form) and angular velocity; its header
+            must be (t)
+        perturbations_func (function): the function that should compute the
+            perturbation torques (N * m); its header must be (satellite)
+        position_velocity_func (function): the function that should compute
+            the position and velocity; its header must be (t)
+        delta_t (float): the time between user-defined integrator steps
+                (not the internal/adaptive integrator steps) in seconds
+    
+    Returns:
+        numpy ndarray: the derivative of the state (10x1) with respect to time
+    """
+    r, v = position_velocity_func(t)
+    satellite.q = normalize(x[0:4])
+    satellite.w = x[4:7]
+    satellite.r = r
+    satellite.v = v
+    # only set if the satellite has actuators
+    try:
+        satellite.actuators.w_rxwls = x[7:10]
+    except AttributeError:
+        pass
+    M_applied, w_dot_rxwls, _ = simulate_estimation_and_control(
+        t, satellite, nominal_state_func, delta_t)
+
+    # calculate the perturbing torques on the satellite
+    M_perturb = perturbations_func(satellite)
+
+    dx = np.empty((10, ))
+    dx[0:4] = quaternion_derivative(satellite.q, satellite.w)
+    dx[4:7] = angular_velocity_derivative(satellite.J, satellite.w,
+                                          [M_applied, M_perturb])
+    dx[7:10] = w_dot_rxwls
+    return dx
 
 
 def simulate_estimation_and_control(t,
@@ -243,8 +243,8 @@ def simulate_estimation_and_control(t,
                     reaction wheels
     """
     # get an attitude and angular velocity estimate from the sensors
-    DCM_estimated = satellite.estimate_attitude(t, delta_t)
     w_estimated = satellite.estimate_angular_velocity(t, delta_t)
+    DCM_estimated = satellite.estimate_attitude(t, delta_t)
 
     # compute the desired attitude and angular velocity
     DCM_desired, w_desired = nominal_state_func(t)
