@@ -24,7 +24,7 @@ If there are issues with the dependencies not importing successfully, confirm th
 
 ### Running on Windows
 1. Download the software present in this repository.
-2. Open Anaconda prompt (installed above) and navigate to the directory containing **project.py** (in **adcs-simulation**).
+2. Open Anaconda prompt (installed above) and navigate to the directory containing [project.py](project.py) (in **adcs-simulation**).
 3. Run the project with the command `python3 project.py`.
 
 
