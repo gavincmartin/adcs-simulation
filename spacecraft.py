@@ -100,7 +100,7 @@ class Spacecraft(object):
         return self.actuators.apply_control_torques(M_ctrl, self.w, t, delta_t)
 
     def estimate_angular_velocity(self, t, delta_t):
-        """Provides an estimated angular velocity (adding noise & bias to the actual)
+        """Wrapper method for gyros.estimate_angular_velocity
         
         Args:
             t (float): the current simulation time in seconds
