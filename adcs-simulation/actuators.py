@@ -1,9 +1,45 @@
+# -*- coding: utf-8 -*-
+"""Actuators module for attitude determination and control system.
+
+This module models actuator behavior and contains a class that stores reaction
+wheel state and methods.
+"""
+
 import numpy as np
 from math_utils import cross
 from scipy.stats import norm
 
 
 class Actuators(object):
+    """A class to store reaction wheel state and methods
+        
+        Args:
+            rxwl_mass (float): the mass of the reaction wheel (kg)
+            rxwl_radius (float): the radius of the reaction wheel (m)
+            w_rxwls (numpy ndarray, optional): Defaults to np.array([0, 0, 0]).
+                The starting angular velocity of the x, y, and z reaction
+                wheels.
+            rxwl_max_torque (float, optional): Defaults to np.inf. The maximum
+                torque (N * m) that a given reaction wheel can apply. If
+                infinity, there is no limit.
+            noise_factor (float, optional): Defaults to 0.0 (perfect).The
+                standard deviation of the Gaussian noise distribution centered
+                at 0. Used to apply noise to the actuation of control torques.
+        
+        Attributes:
+            C_w (float): the moment of inertia of the wheels about their spin
+                axes
+            w_rxwls (numpy ndarray): the angular velocity of the reaction
+                wheels
+            rxwl_max_torque (float) the maximum torque (N * m) that a given
+                reaction wheel can apply. If infinity, there is no limit.
+            rxwl_max_momentum (float): the maximum momentum (N * m * s) that a
+                given reaction wheel can have before saturation. If infinity,
+                there is no limit.
+            noise_vals (numpy ndarray): a cache of pre-generated noise values
+                to aid in the addition of noise
+    """
+
     def __init__(self,
                  rxwl_mass,
                  rxwl_radius,
@@ -22,6 +58,9 @@ class Actuators(object):
             rxwl_max_torque (float, optional): Defaults to np.inf. The maximum
                 torque (N * m) that a given reaction wheel can apply. If
                 infinity, there is no limit.
+            rxwl_max_momentum (float, optional): Defaults to np.inf. The maximum
+                momentum (N * m * s) that a given reaction wheel can have
+                before saturation. If infinity, there is no limit.
             noise_factor (float, optional): Defaults to 0.0 (perfect).The
                 standard deviation of the Gaussian noise distribution centered
                 at 0. Used to apply noise to the actuation of control torques.

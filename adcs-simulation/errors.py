@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""Errors module for attitude determination and control system.
+
+This module computes the attitude and attitude rate errors given the estimated
+and desired states (attitude and angular velocity) at a given time.
+"""
+
 import numpy as np
 from math_utils import quaternion_multiply, cross
 

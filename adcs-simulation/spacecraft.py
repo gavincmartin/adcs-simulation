@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+"""Spacecraft module for attitude determination and control system.
+
+This module stores a number of composed objects that describe the overall
+spacecraft and its associated controller, gyros, etc. It is primarily used to
+simplify the process of passing parameters between methods, and it has aliases
+for a number of methods of its sub-objects for simplicity.
+"""
+
 import numpy as np
 from math_utils import cross, triad, dcm_to_quaternion, normalize, quaternion_to_dcm
 from sensor_models import compute_earth_direction, compute_local_magnetic_field
@@ -7,6 +16,49 @@ from perturbations import gravity_gradient_torque, magnetic_field_torque
 
 
 class Spacecraft(object):
+    """A class to store system objects and state over time
+        
+        Args:
+            J (numpy ndarray): the spacecraft's inertia tensor (3x3) (kg * m^2)
+            controller (PDController): the controller that will compute control
+                torques to meet desired pointing and angular velocity
+                requirements
+            gyros (Gyros): an object that models gyroscopes and simulates
+                estimated angular velocity by introducing bias and noise to
+                angular velocity measurements
+            actuators (Actuators): an object that stores reaction wheel state
+                and related methods; actually applies control torques generated
+                by the controller object
+            dipole (numpy ndarray): the spacecraft's residual magnetic dipole
+                vector (A * m^2)
+            q (numpy ndarray): the quaternion representing the attitude (from
+                the inertial to body frame) of the spacecraft (at a given time)
+            w (numpy ndarray): the angular velocity (rad/s) (3x1) in body
+                coordinates of the spacecraft (at a given time)
+            r (numpy ndarray): the inertial position of the spacecraft (m)
+            v (numpy ndarray): the inertial velocity of the spacecraft (m/s)
+        
+        Attributes:
+            J (numpy ndarray): the spacecraft's inertia tensor (3x3) (kg * m^2)
+            controller (PDController): the controller that will compute control
+                torques to meet desired pointing and angular velocity
+                requirements
+            gyros (Gyros): an object that models gyroscopes and simulates
+                estimated angular velocity by introducing bias and noise to
+                angular velocity measurements
+            actuators (Actuators): an object that stores reaction wheel state
+                and related methods; actually applies control torques generated
+                by the controller object
+            dipole (numpy ndarray): the spacecraft's residual magnetic dipole
+                vector (A * m^2)
+            q (numpy ndarray): the quaternion representing the attitude (from
+                the inertial to body frame) of the spacecraft (at a given time)
+            w (numpy ndarray): the angular velocity (rad/s) (3x1) in body
+                coordinates of the spacecraft (at a given time)
+            r (numpy ndarray): the inertial position of the spacecraft (m)
+            v (numpy ndarray): the inertial velocity of the spacecraft (m/s)
+    """
+
     def __init__(self,
                  J=np.diag([100, 100, 100]),
                  controller=PDController(

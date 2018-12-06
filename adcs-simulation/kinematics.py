@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+"""Kinematics module for attitude determination and control system.
+
+This module models the kinematic evolution of the quaternion describing 
+spacecraft attitude over time as a function of its current attitude and
+angular velocity.
+"""
+
 import numpy as np
 from math_utils import quaternion_multiply
 

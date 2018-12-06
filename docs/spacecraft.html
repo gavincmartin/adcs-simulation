@@ -1,0 +1,407 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>spacecraft module &#8212; ADCS-Simulation 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">ADCS-Simulation 1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+<div class="content-wrapper">
+    <div class="content">
+        <div class="document">
+            <div class="sphinxsidebar">
+                <h3>Table Of Contents</h3>
+                
+                <h3 style="margin-top: 1.5em;">Search</h3>
+
+                <form class="search" action="search.html" method="get">
+                    <input type="text" name="q" size="18"/>
+                    <input type="submit" value="Go"/>
+                    <input type="hidden" name="check_keywords" value="yes"/>
+                    <input type="hidden" name="area" value="default"/>
+                </form>
+                <p class="searchtip" style="font-size: 90%">
+                    Enter search terms or a module, class or function name.
+                </p>
+
+            </div>
+             
+            <div class="documentwrapper">
+                <div class="bodywrapper">
+                    <div class="body">
+                        
+  <div class="section" id="module-spacecraft">
+<span id="spacecraft-module"></span><h1>spacecraft module<a class="headerlink" href="#module-spacecraft" title="Permalink to this headline">¶</a></h1>
+<p>Spacecraft module for attitude determination and control system.</p>
+<p>This module stores a number of composed objects that describe the overall
+spacecraft and its associated controller, gyros, etc. It is primarily used to
+simplify the process of passing parameters between methods, and it has aliases
+for a number of methods of its sub-objects for simplicity.</p>
+<dl class="class">
+<dt id="spacecraft.Spacecraft">
+<em class="property">class </em><code class="descclassname">spacecraft.</code><code class="descname">Spacecraft</code><span class="sig-paren">(</span><em>J=array([[100,   0,   0],        [  0, 100,   0],        [  0,   0, 100]]), controller=&lt;controller.PDController object&gt;, gyros=None, magnetometer=None, earth_horizon_sensor=None, actuators=&lt;actuators.Actuators object&gt;, dipole=array([0, 0, 0]), q=array([0, 0, 0, 1]), w=array([0, 0, 0]), r=array([0, 0, 0]), v=array([0, 0, 0])</em><span class="sig-paren">)</span><a class="headerlink" href="#spacecraft.Spacecraft" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>A class to store system objects and state over time</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>J</strong> (<em>numpy ndarray</em>) &#8211; the spacecraft&#8217;s inertia tensor (3x3) (kg * m^2)</li>
+<li><strong>controller</strong> (<a class="reference internal" href="controller.html#controller.PDController" title="controller.PDController"><em>PDController</em></a>) &#8211; the controller that will compute control
+torques to meet desired pointing and angular velocity
+requirements</li>
+<li><strong>gyros</strong> (<a class="reference internal" href="sensors.html#sensors.Gyros" title="sensors.Gyros"><em>Gyros</em></a>) &#8211; an object that models gyroscopes and simulates
+estimated angular velocity by introducing bias and noise to
+angular velocity measurements</li>
+<li><strong>actuators</strong> (<a class="reference internal" href="actuators.html#actuators.Actuators" title="actuators.Actuators"><em>Actuators</em></a>) &#8211; an object that stores reaction wheel state
+and related methods; actually applies control torques generated
+by the controller object</li>
+<li><strong>dipole</strong> (<em>numpy ndarray</em>) &#8211; the spacecraft&#8217;s residual magnetic dipole
+vector (A * m^2)</li>
+<li><strong>q</strong> (<em>numpy ndarray</em>) &#8211; the quaternion representing the attitude (from
+the inertial to body frame) of the spacecraft (at a given time)</li>
+<li><strong>w</strong> (<em>numpy ndarray</em>) &#8211; the angular velocity (rad/s) (3x1) in body
+coordinates of the spacecraft (at a given time)</li>
+<li><strong>r</strong> (<em>numpy ndarray</em>) &#8211; the inertial position of the spacecraft (m)</li>
+<li><strong>v</strong> (<em>numpy ndarray</em>) &#8211; the inertial velocity of the spacecraft (m/s)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="spacecraft.Spacecraft.J">
+<code class="descname">J</code><a class="headerlink" href="#spacecraft.Spacecraft.J" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>numpy ndarray</em> &#8211; the spacecraft&#8217;s inertia tensor (3x3) (kg * m^2)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="spacecraft.Spacecraft.controller">
+<code class="descname">controller</code><a class="headerlink" href="#spacecraft.Spacecraft.controller" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>PDController</em> &#8211; the controller that will compute control
+torques to meet desired pointing and angular velocity
+requirements</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="spacecraft.Spacecraft.gyros">
+<code class="descname">gyros</code><a class="headerlink" href="#spacecraft.Spacecraft.gyros" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>Gyros</em> &#8211; an object that models gyroscopes and simulates
+estimated angular velocity by introducing bias and noise to
+angular velocity measurements</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="spacecraft.Spacecraft.actuators">
+<code class="descname">actuators</code><a class="headerlink" href="#spacecraft.Spacecraft.actuators" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>Actuators</em> &#8211; an object that stores reaction wheel state
+and related methods; actually applies control torques generated
+by the controller object</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="spacecraft.Spacecraft.dipole">
+<code class="descname">dipole</code><a class="headerlink" href="#spacecraft.Spacecraft.dipole" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>numpy ndarray</em> &#8211; the spacecraft&#8217;s residual magnetic dipole
+vector (A * m^2)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="spacecraft.Spacecraft.q">
+<code class="descname">q</code><a class="headerlink" href="#spacecraft.Spacecraft.q" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>numpy ndarray</em> &#8211; the quaternion representing the attitude (from
+the inertial to body frame) of the spacecraft (at a given time)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="spacecraft.Spacecraft.w">
+<code class="descname">w</code><a class="headerlink" href="#spacecraft.Spacecraft.w" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>numpy ndarray</em> &#8211; the angular velocity (rad/s) (3x1) in body
+coordinates of the spacecraft (at a given time)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="spacecraft.Spacecraft.r">
+<code class="descname">r</code><a class="headerlink" href="#spacecraft.Spacecraft.r" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>numpy ndarray</em> &#8211; the inertial position of the spacecraft (m)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="spacecraft.Spacecraft.v">
+<code class="descname">v</code><a class="headerlink" href="#spacecraft.Spacecraft.v" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>numpy ndarray</em> &#8211; the inertial velocity of the spacecraft (m/s)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spacecraft.Spacecraft.apply_control_torques">
+<code class="descname">apply_control_torques</code><span class="sig-paren">(</span><em>M_ctrl</em>, <em>t</em>, <em>delta_t</em><span class="sig-paren">)</span><a class="headerlink" href="#spacecraft.Spacecraft.apply_control_torques" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper method for Actuators.apply_control_torques</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>M_ctrl</strong> (<em>numpy ndarray</em>) &#8211; the control torque (3x1) produced by the
+PD controller (N * m)</li>
+<li><strong>w_sc</strong> (<em>numpy ndarray</em>) &#8211; the angular velocity (rad/s) (3x1) in body
+coordinates of the spacecraft (at a given time)</li>
+<li><strong>t</strong> (<em>float</em>) &#8211; the current simulation time in seconds</li>
+<li><strong>delta_t</strong> (<em>float</em>) &#8211; the time between user-defined integrator steps
+(not the internal/adaptive integrator steps) in seconds</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
+<dt>the control moment (3x1) as actually applied on</dt>
+<dd><p class="first last">the reaction wheels (the input control torque with some
+Gaussian noise applied) (N * m)</p>
+</dd>
+<dt>numpy ndarray: the angular acceleration of the 3 reaction wheels</dt>
+<dd><p class="first last">applied to achieve the applied torque (rad/s^2)</p>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">numpy ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="spacecraft.Spacecraft.approximate_gravity_gradient_torque">
+<code class="descname">approximate_gravity_gradient_torque</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#spacecraft.Spacecraft.approximate_gravity_gradient_torque" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the gravity gradient torque acting on a spacecraft</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>the gravity gradient torque acting on the spacecraft</dt>
+<dd>coordinatized in the body frame</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">numpy ndarray</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="spacecraft.Spacecraft.approximate_magnetic_field_torque">
+<code class="descname">approximate_magnetic_field_torque</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#spacecraft.Spacecraft.approximate_magnetic_field_torque" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the magnetic field torque acting on a spacecraft</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>the magnetic field torque acting on the spacecraft</dt>
+<dd>coordinatized in the body frame</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">numpy ndarray</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="spacecraft.Spacecraft.calculate_control_torques">
+<code class="descname">calculate_control_torques</code><span class="sig-paren">(</span><em>attitude_err</em>, <em>attitude_rate_err</em><span class="sig-paren">)</span><a class="headerlink" href="#spacecraft.Spacecraft.calculate_control_torques" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper method for Controller.calculate_control_torques</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>attitude_err</strong> (<em>numpy ndarray</em>) &#8211; the attitude error (3x1) of the
+spacecraft at a given time</li>
+<li><strong>attitude_rate_err</strong> (<em>numpy ndarray</em>) &#8211; the attitude rate error (3x1) of
+the spacecraft at a given time</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
+<dt>the control torque (3x1) produced by the PD</dt>
+<dd><p class="first last">controller (N * m) or [0, 0, 0] if there is no controller</p>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">numpy ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="spacecraft.Spacecraft.estimate_angular_velocity">
+<code class="descname">estimate_angular_velocity</code><span class="sig-paren">(</span><em>t</em>, <em>delta_t</em><span class="sig-paren">)</span><a class="headerlink" href="#spacecraft.Spacecraft.estimate_angular_velocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper method for gyros.estimate_angular_velocity</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>t</strong> (<em>float</em>) &#8211; the current simulation time in seconds</li>
+<li><strong>delta_t</strong> (<em>float</em>) &#8211; the time between user-defined integrator steps
+(not the internal/adaptive integrator steps) in seconds</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the estimated angular velocity in rad/s</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">numpy ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="spacecraft.Spacecraft.estimate_attitude">
+<code class="descname">estimate_attitude</code><span class="sig-paren">(</span><em>t</em>, <em>delta_t</em><span class="sig-paren">)</span><a class="headerlink" href="#spacecraft.Spacecraft.estimate_attitude" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provides an estimated attitude (adding measurement noise to the actual)</p>
+<p>This method uses the TRIAD algorithm to compute the attitude from
+two direction measurements.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>t</strong> (<em>float</em>) &#8211; the current simulation time in seconds</li>
+<li><strong>delta_t</strong> (<em>float</em>) &#8211; the time between user-defined integrator steps
+(not the internal/adaptive integrator steps) in seconds</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
+<dt>the estimated DCM representing the attitude (from</dt>
+<dd><p class="first last">the inertial to body frame) of the spacecraft (at a given time)</p>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">numpy ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="clearer"></div>
+        </div>
+    </div>
+</div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">ADCS-Simulation 1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+<style type="text/css">
+    .scrollToTop {
+        text-align: center;
+        font-weight: bold;
+        position: fixed;
+        bottom: 60px;
+        right: 40px;
+        display: none;
+    }
+</style>
+<a href="#" class="scrollToTop">Scroll To Top</a>
+<script type="text/javascript">
+$(document).ready(function() {
+    //Check to see if the window is top if not then display button
+    $(window).scroll(function() {
+        if ($(this).scrollTop() > 200) {
+            $('.scrollToTop').fadeIn();
+        } else {
+            $('.scrollToTop').fadeOut();
+        }
+    });
+
+    //Click event to scroll to top
+    $('.scrollToTop').click(function() {
+        $('html, body').animate({
+            scrollTop: 0
+        }, 500);
+        return false;
+    });
+});
+</script>
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-27880019-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+  </body>
+</html>

@@ -1,0 +1,7 @@
+sensor\_models module
+=====================
+
+.. automodule:: sensor_models
+    :members:
+    :undoc-members:
+    :show-inheritance:

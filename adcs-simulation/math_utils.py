@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""Utilities module for attitude determination and control system.
+
+This module contains a number of utility methods to simplify mathematical
+calculations performed elswhere. It also implements the TRIAD algorithm.
+"""
+
 import numpy as np
 from scipy.stats import norm
 

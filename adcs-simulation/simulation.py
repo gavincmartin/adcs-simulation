@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+"""Simulation module for attitude determination and control system.
+
+This module forms the core of the simulation engine and utilizes the classes
+and functions written elsewhere to model the system and perform numerical
+integration.
+"""
+
 import numpy as np
 from scipy.integrate import ode, RK45, odeint
 from kinematics import quaternion_derivative
@@ -26,7 +34,6 @@ def simulate_adcs(satellite,
             perturbation torques (N * m); its header must be (satellite)
         position_velocity_func (function): the function that should compute
             the position and velocity; its header must be (t)
-        verbose (bool, optional): Defaults to False. [description]
         start_time (float, optional): Defaults to 0. The start time of the
             simulation in seconds
         delta_t (float, optional): Defaults to 1. The time between user-defined

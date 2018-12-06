@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""Project module for attitude determination and control system.
+
+This module is simply the control script that utilizes the simulation engine
+and plots the results.
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 from spacecraft import Spacecraft

@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""Perturbations module for attitude determination and control system.
+
+This module models perturbing torques acting on a spacecraft given the relevant
+spacecraft parameters and its current state.
+"""
+
 import numpy as np
 from math_utils import cross, normalize
 from sensor_models import compute_local_magnetic_field

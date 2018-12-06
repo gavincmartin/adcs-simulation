@@ -1,0 +1,317 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>simulation module &#8212; ADCS-Simulation 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">ADCS-Simulation 1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+<div class="content-wrapper">
+    <div class="content">
+        <div class="document">
+            <div class="sphinxsidebar">
+                <h3>Table Of Contents</h3>
+                
+                <h3 style="margin-top: 1.5em;">Search</h3>
+
+                <form class="search" action="search.html" method="get">
+                    <input type="text" name="q" size="18"/>
+                    <input type="submit" value="Go"/>
+                    <input type="hidden" name="check_keywords" value="yes"/>
+                    <input type="hidden" name="area" value="default"/>
+                </form>
+                <p class="searchtip" style="font-size: 90%">
+                    Enter search terms or a module, class or function name.
+                </p>
+
+            </div>
+             
+            <div class="documentwrapper">
+                <div class="bodywrapper">
+                    <div class="body">
+                        
+  <div class="section" id="module-simulation">
+<span id="simulation-module"></span><h1>simulation module<a class="headerlink" href="#module-simulation" title="Permalink to this headline">¶</a></h1>
+<p>Simulation module for attitude determination and control system.</p>
+<p>This module forms the core of the simulation engine and utilizes the classes
+and functions written elsewhere to model the system and perform numerical
+integration.</p>
+<dl class="function">
+<dt id="simulation.derivatives_func">
+<code class="descclassname">simulation.</code><code class="descname">derivatives_func</code><span class="sig-paren">(</span><em>t</em>, <em>x</em>, <em>satellite</em>, <em>nominal_state_func</em>, <em>perturbations_func</em>, <em>position_velocity_func</em>, <em>delta_t</em><span class="sig-paren">)</span><a class="headerlink" href="#simulation.derivatives_func" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the derivative of the spacecraft state</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>t</strong> (<em>float</em>) &#8211; the time (in seconds)</li>
+<li><strong>x</strong> (<em>numpy ndarray</em>) &#8211; the state (10x1) where the elements are:
+[0, 1, 2, 3]: the quaternion describing the spacecraft attitude
+[4, 5, 6]: the angular velocity of the spacecraft
+[7, 8, 9]: the angular velocities of the reaction wheels</li>
+<li><strong>satellite</strong> (<a class="reference internal" href="spacecraft.html#spacecraft.Spacecraft" title="spacecraft.Spacecraft"><em>Spacecraft</em></a>) &#8211; the Spacecraft object that represents the
+satellite being modeled</li>
+<li><strong>nominal_state_func</strong> (<em>function</em>) &#8211; the function that should compute the
+nominal attitude (in DCM form) and angular velocity; its header
+must be (t)</li>
+<li><strong>perturbations_func</strong> (<em>function</em>) &#8211; the function that should compute the
+perturbation torques (N * m); its header must be (satellite)</li>
+<li><strong>position_velocity_func</strong> (<em>function</em>) &#8211; the function that should compute
+the position and velocity; its header must be (t)</li>
+<li><strong>delta_t</strong> (<em>float</em>) &#8211; the time between user-defined integrator steps
+(not the internal/adaptive integrator steps) in seconds</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the derivative of the state (10x1) with respect to time</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">numpy ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="simulation.simulate_adcs">
+<code class="descclassname">simulation.</code><code class="descname">simulate_adcs</code><span class="sig-paren">(</span><em>satellite</em>, <em>nominal_state_func</em>, <em>perturbations_func</em>, <em>position_velocity_func</em>, <em>start_time=0</em>, <em>delta_t=1</em>, <em>stop_time=6000</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#simulation.simulate_adcs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simulates an attitude determination and control system over a period of time</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>satellite</strong> (<a class="reference internal" href="spacecraft.html#spacecraft.Spacecraft" title="spacecraft.Spacecraft"><em>Spacecraft</em></a>) &#8211; the Spacecraft object that represents the
+satellite being modeled</li>
+<li><strong>nominal_state_func</strong> (<em>function</em>) &#8211; the function that should compute the
+nominal attitude (in DCM form) and angular velocity; its header
+must be (t)</li>
+<li><strong>perturbations_func</strong> (<em>function</em>) &#8211; the function that should compute the
+perturbation torques (N * m); its header must be (satellite)</li>
+<li><strong>position_velocity_func</strong> (<em>function</em>) &#8211; the function that should compute
+the position and velocity; its header must be (t)</li>
+<li><strong>start_time</strong> (<em>float</em><em>, </em><em>optional</em>) &#8211; Defaults to 0. The start time of the
+simulation in seconds</li>
+<li><strong>delta_t</strong> (<em>float</em><em>, </em><em>optional</em>) &#8211; Defaults to 1. The time between user-defined
+integrator steps (not the internal/adaptive integrator steps) in
+seconds</li>
+<li><strong>stop_time</strong> (<em>float</em><em>, </em><em>optional</em>) &#8211; Defaults to 6000. The end time of the
+simulation in seconds</li>
+<li><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) &#8211; integrator output to the console while running.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
+<dt>a dictionary of simulation results. Each value is an NxM numpy</dt>
+<dd><p class="first">ndarray where N is the number of time steps taken and M is the
+size of the data being represented at that time (M=1 for time,
+3 for angular velocity, 4 for quaternion, etc.)
+Contains:</p>
+<blockquote class="last">
+<div><ul class="simple">
+<li>times (numpy ndarray): the times of all associated data</li>
+<li>q_actual (numpy ndarray): actual quaternion</li>
+<li>w_actual (numpy ndarray): actual angular velocity</li>
+<li><dl class="first docutils">
+<dt>w_rxwls (numpy ndarray): angular velocity of the reaction</dt>
+<dd>wheels</dd>
+</dl>
+</li>
+<li>DCM_estimated (numpy ndarray): estimated DCM</li>
+<li>w_estimated (numpy ndarray): estimated angular velocity</li>
+<li>DCM_desired (numpy ndarray): desired DCM</li>
+<li>w_desired (numpy ndarray): desired angular velocity</li>
+<li>attitude_err (numpy ndarray): attitude error</li>
+<li>attitude_rate_err (numpy ndarray): attitude rate error</li>
+<li>M_ctrl (numpy ndarray): control torque</li>
+<li>M_applied (numpy ndarray): applied control torque</li>
+<li><dl class="first docutils">
+<dt>w_dot_rxwls (numpy ndarray): angular acceleration of</dt>
+<dd>reaction wheels</dd>
+</dl>
+</li>
+<li>M_perturb (numpy ndarray): sum of perturbation torques</li>
+<li>positions (numpy ndarray): inertial positions</li>
+<li>velocities (numpy ndarray): inertial velocities</li>
+</ul>
+</div></blockquote>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="simulation.simulate_estimation_and_control">
+<code class="descclassname">simulation.</code><code class="descname">simulate_estimation_and_control</code><span class="sig-paren">(</span><em>t</em>, <em>satellite</em>, <em>nominal_state_func</em>, <em>delta_t</em>, <em>log=False</em><span class="sig-paren">)</span><a class="headerlink" href="#simulation.simulate_estimation_and_control" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simulates attitude estimation and control for derivatives calculation</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>t</strong> (<em>float</em>) &#8211; the time (in seconds)</li>
+<li><strong>satellite</strong> (<a class="reference internal" href="spacecraft.html#spacecraft.Spacecraft" title="spacecraft.Spacecraft"><em>Spacecraft</em></a>) &#8211; the Spacecraft object that represents the
+satellite being modeled</li>
+<li><strong>nominal_state_func</strong> (<em>function</em>) &#8211; the function that should compute the
+nominal attitude (in DCM form) and angular velocity; its header
+must be (t)</li>
+<li><strong>perturbations_func</strong> (<em>function</em>) &#8211; the function that should compute the
+perturbation torques (N * m); its header must be (t, q, w)</li>
+<li><strong>delta_t</strong> (<em>float</em>) &#8211; the time between user-defined integrator steps
+(not the internal/adaptive integrator steps) in seconds</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
+<dt>the control moment (3x1) as actually applied on</dt>
+<dd><p class="first last">the reaction wheels (the input control torque with some
+Gaussian noise applied) (N * m)</p>
+</dd>
+<dt>numpy ndarray: the angular acceleration of the 3 reaction wheels</dt>
+<dd><p class="first last">applied to achieve the applied torque (rad/s^2)</p>
+</dd>
+<dt>dict: a dictionary containing results logged for this simulation step;</dt>
+<dd><dl class="first last docutils">
+<dt>Contains:</dt>
+<dd><ul class="first last simple">
+<li>DCM_estimated (numpy ndarray): estimated DCM</li>
+<li>w_estimated (numpy ndarray): estimated angular velocity</li>
+<li>DCM_desired (numpy ndarray): desired DCM</li>
+<li>w_desired (numpy ndarray): desired angular velocity</li>
+<li>attitude_err (numpy ndarray): attitude error</li>
+<li>attitude_rate_err (numpy ndarray): attitude rate error</li>
+<li>M_ctrl (numpy ndarray): control torque</li>
+<li>M_applied (numpy ndarray): applied control torque</li>
+<li><dl class="first docutils">
+<dt>w_dot_rxwls (numpy ndarray): angular acceleration of</dt>
+<dd>reaction wheels</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">numpy ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="clearer"></div>
+        </div>
+    </div>
+</div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">ADCS-Simulation 1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+<style type="text/css">
+    .scrollToTop {
+        text-align: center;
+        font-weight: bold;
+        position: fixed;
+        bottom: 60px;
+        right: 40px;
+        display: none;
+    }
+</style>
+<a href="#" class="scrollToTop">Scroll To Top</a>
+<script type="text/javascript">
+$(document).ready(function() {
+    //Check to see if the window is top if not then display button
+    $(window).scroll(function() {
+        if ($(this).scrollTop() > 200) {
+            $('.scrollToTop').fadeIn();
+        } else {
+            $('.scrollToTop').fadeOut();
+        }
+    });
+
+    //Click event to scroll to top
+    $('.scrollToTop').click(function() {
+        $('html, body').animate({
+            scrollTop: 0
+        }, 500);
+        return false;
+    });
+});
+</script>
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-27880019-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+  </body>
+</html>

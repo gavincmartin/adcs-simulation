@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""Sensor Models module for attitude determination and control system.
+
+This module implements models for sensor estimates in inertial coordinates
+that are subsequently used by the actual sensor simulation in `sensors.py`.
+"""
+
 import numpy as np
 from math_utils import get_DCM_i2NED, normalize
 

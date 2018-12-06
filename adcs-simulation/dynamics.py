@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+"""Dynamics module for attitude determination and control system.
+
+This module models the evolution of the angular velocity of a spacecraft given
+a set of external torques, the spacecraft inertia tensor, and its current
+angular velocity.
+"""
+
 import numpy as np
 from math_utils import cross
 

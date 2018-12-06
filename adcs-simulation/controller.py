@@ -1,7 +1,29 @@
+# -*- coding: utf-8 -*-
+"""Controller module for attitude determination and control system.
+
+This module models the behavior of a PD controller and contains a class that
+stores controller gains and associated controller methods.
+"""
+
 import numpy as np
 
 
 class PDController(object):
+    """A class to store PD controller parameters and methods
+    
+    Args:
+        k_d (numpy ndarray): the gains matrix (3x3) for the derivative
+                control
+        k_p (numpy ndarray): the gains matrix (3x3) for the proportional
+            control
+    
+    Attributes:
+        k_d (numpy ndarray): the gains matrix (3x3) for the derivative
+                control
+        k_p (numpy ndarray): the gains matrix (3x3) for the proportional
+            control
+    """
+
     def __init__(self, k_d, k_p):
         """Constructs a Proportional Derivative Controller object
 

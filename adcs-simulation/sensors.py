@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""Sensors module for attitude determination and control system.
+
+This module models the behavior of a suite of sensors and contains classes
+that abstract gyroscopes, Earth horizon sensors, and magnetometers in order
+to produce attitude and angular velocity estimates.
+"""
 import numpy as np
 from scipy.stats import norm
 from math_utils import normalize, quaternion_to_dcm, skew_symmetric, cross
@@ -5,6 +12,20 @@ from sensor_models import compute_local_magnetic_field, compute_earth_direction
 
 
 class Gyros(object):
+    """A class to store gyroscope parameters and methods
+    
+    Args:
+        bias_stability (float): the bias stability of the gyro in deg/hr
+        angular_random_walk (float): the angular random walk of the gyro
+            in deg/sqrt(hr)
+    
+    Attributes:
+        bias (numpy ndarray): the biases of the gyros throughout the duration
+            of a simulation (3x1)
+        noise_vals (numpy ndarray): a cache of pre-generated noise values
+                to aid in the addition of noise
+    """
+
     def __init__(self, bias_stability, angular_random_walk):
         """Constructs a set of gyroscopes to estimate angular velocity
         
@@ -79,6 +100,18 @@ class Gyros(object):
 
 
 class Magnetometer(object):
+    """A class to store magnetometer parameters and methods
+    
+    Args:
+        resolution (float): the resolution of the magnetometer in Tesla;
+            a resolution of 0 T means no measurement noise (it is a perfect
+            sensor)
+    
+    Attributes:
+        noise_vals (numpy ndarray): a cache of pre-generated noise values
+                to aid in the addition of noise
+    """
+
     def __init__(self, resolution=0):
         """Constructs a magnetometer to measure the local magnetic field
         
@@ -144,6 +177,18 @@ class Magnetometer(object):
 
 
 class EarthHorizonSensor(object):
+    """A class to store Earth horizon sensor parameters and methods
+    
+    Args:
+        resolution (float): the accuracy of the sensor in degrees; an
+            accuracy of 0 means no measurement noise is applied (it is
+            a perfect sensor)
+    
+    Attributes:
+        noise_vals (numpy ndarray): a cache of pre-generated noise values
+                to aid in the addition of noise
+    """
+
     def __init__(self, accuracy):
         """Constructs an Earth horizon sensor to measure the Earth direction
         
