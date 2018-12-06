@@ -227,25 +227,41 @@ def simulate(satellite,
     plt.plot(results["times"], results["q_actual"][:, 3])
     plt.ylabel(r"$Q_3$")
     plt.xlabel(r"Time (s)")
+    plt.subplots_adjust(
+        left=0.08, right=0.94, bottom=0.08, top=0.94, hspace=0.3)
 
     plt.figure(2)
     plt.subplot(311)
     plt.title(r"Evolution of Angular Velocity over Time {}".format(tag))
     plt.plot(results["times"], results["w_actual"][:, 0], label="actual")
-    plt.plot(results["times"], results["w_desired"][:, 0], label="desired")
+    plt.plot(
+        results["times"],
+        results["w_desired"][:, 0],
+        label="desired",
+        linestyle="--")
     plt.ylabel(r"$\omega_x$ (rad/s)")
     plt.legend()
     plt.subplot(312)
     plt.plot(results["times"], results["w_actual"][:, 1], label="actual")
-    plt.plot(results["times"], results["w_desired"][:, 1], label="desired")
+    plt.plot(
+        results["times"],
+        results["w_desired"][:, 1],
+        label="desired",
+        linestyle="--")
     plt.ylabel(r"$\omega_y$ (rad/s)")
     plt.legend()
     plt.subplot(313)
     plt.plot(results["times"], results["w_actual"][:, 2], label="actual")
-    plt.plot(results["times"], results["w_desired"][:, 2], label="desired")
+    plt.plot(
+        results["times"],
+        results["w_desired"][:, 2],
+        label="desired",
+        linestyle="--")
     plt.ylabel(r"$\omega_z$ (rad/s)")
     plt.xlabel(r"Time (s)")
     plt.legend()
+    plt.subplots_adjust(
+        left=0.08, right=0.94, bottom=0.08, top=0.94, hspace=0.3)
 
     plt.figure(3)
     plt.subplot(311)
@@ -259,6 +275,8 @@ def simulate(satellite,
     plt.plot(results["times"], results["w_rxwls"][:, 2])
     plt.ylabel(r"$\omega_3$ (rad/s)")
     plt.xlabel(r"Time (s)")
+    plt.subplots_adjust(
+        left=0.08, right=0.94, bottom=0.08, top=0.94, hspace=0.3)
 
     plt.figure(4)
     plt.subplot(311)
@@ -272,6 +290,8 @@ def simulate(satellite,
     plt.plot(results["times"], results["M_perturb"][:, 2])
     plt.ylabel(r"$M_z (N \cdot m)$")
     plt.xlabel(r"Time (s)")
+    plt.subplots_adjust(
+        left=0.08, right=0.94, bottom=0.08, top=0.94, hspace=0.3)
 
     plt.figure(5)
     DCM_actual = np.empty(results["DCM_desired"].shape)
@@ -290,13 +310,96 @@ def simulate(satellite,
             plt.plot(
                 results["times"],
                 results["DCM_desired"][:, i, j],
-                label="desired")
+                label="desired",
+                linestyle="--")
             element = "T_{" + str(i + 1) + str(j + 1) + "}"
             plt.ylabel("$" + element + "$")
             if k >= 7:
                 plt.xlabel(r"Time (s)")
             plt.legend()
             k += 1
+    plt.subplots_adjust(
+        left=0.08, right=0.94, bottom=0.08, top=0.94, hspace=0.25, wspace=0.3)
+
+    plt.figure(6)
+    k = 1
+    for i in range(3):
+        for j in range(3):
+            plot_num = int("33{}".format(k))
+            plt.subplot(plot_num)
+            if k == 2:
+                plt.title(
+                    r"Actual vs Estimated Attitude over Time {}".format(tag))
+            plt.plot(results["times"], DCM_actual[:, i, j], label="actual")
+            plt.plot(
+                results["times"],
+                results["DCM_estimated"][:, i, j],
+                label="estimated",
+                linestyle="--",
+                color="y")
+            element = "T_{" + str(i + 1) + str(j + 1) + "}"
+            plt.ylabel("$" + element + "$")
+            if k >= 7:
+                plt.xlabel(r"Time (s)")
+            plt.legend()
+            k += 1
+    plt.subplots_adjust(
+        left=0.08, right=0.94, bottom=0.08, top=0.94, hspace=0.25, wspace=0.3)
+
+    plt.figure(7)
+    plt.subplot(311)
+    plt.title(r"Actual vs Estimated Angular Velocity over Time {}".format(tag))
+    plt.plot(results["times"], results["w_actual"][:, 0], label="actual")
+    plt.plot(
+        results["times"],
+        results["w_estimated"][:, 0],
+        label="estimated",
+        linestyle="--",
+        color="y")
+    plt.ylabel(r"$\omega_x$ (rad/s)")
+    plt.legend()
+    plt.subplot(312)
+    plt.plot(results["times"], results["w_actual"][:, 1], label="actual")
+    plt.plot(
+        results["times"],
+        results["w_estimated"][:, 1],
+        label="estimated",
+        linestyle="--",
+        color="y")
+    plt.ylabel(r"$\omega_y$ (rad/s)")
+    plt.legend()
+    plt.subplot(313)
+    plt.plot(results["times"], results["w_actual"][:, 2], label="actual")
+    plt.plot(
+        results["times"],
+        results["w_estimated"][:, 2],
+        label="estimated",
+        linestyle="--",
+        color="y")
+    plt.ylabel(r"$\omega_z$ (rad/s)")
+    plt.xlabel(r"Time (s)")
+    plt.legend()
+    plt.subplots_adjust(
+        left=0.08, right=0.94, bottom=0.08, top=0.94, hspace=0.3)
+
+    plt.figure(8)
+    plt.subplot(311)
+    plt.title(r"Commanded vs Applied Torques over Time {}".format(tag))
+    plt.plot(results["times"], results["M_applied"][:, 0], label="applied")
+    plt.plot(results["times"], results["M_ctrl"][:, 0], label="commanded")
+    plt.ylabel(r"$M_x (N \cdot m)$")
+    plt.subplot(312)
+    plt.plot(results["times"], results["M_applied"][:, 1], label="applied")
+    plt.plot(results["times"], results["M_ctrl"][:, 1], label="commanded")
+    plt.ylabel(r"$M_y (N \cdot m)$")
+    plt.subplot(313)
+    plt.plot(results["times"], results["M_applied"][:, 2], label="applied")
+    plt.plot(results["times"], results["M_ctrl"][:, 2], label="commanded")
+    plt.ylabel(r"$M_z (N \cdot m)$")
+    plt.xlabel(r"Time (s)")
+    plt.legend()
+    plt.subplots_adjust(
+        left=0.08, right=0.94, bottom=0.08, top=0.94, hspace=0.3)
 
     plt.show()
 
