@@ -205,10 +205,10 @@ def simulate(satellite,
         stop_time=stop_time,
         verbose=True)
 
-    plt.rc('text', usetex=True)
+    # plt.rc('text', usetex=True)
+    # plt.rc('font', family='serif')
     plt.rc("figure", dpi=120)
     plt.rc("savefig", dpi=120)
-    plt.rc('font', family='serif')
 
     # plot the desired results (logged at each delta_t)
 
@@ -386,15 +386,29 @@ def simulate(satellite,
     plt.subplot(311)
     plt.title(r"Commanded vs Applied Torques over Time {}".format(tag))
     plt.plot(results["times"], results["M_applied"][:, 0], label="applied")
-    plt.plot(results["times"], results["M_ctrl"][:, 0], label="commanded")
+    plt.plot(
+        results["times"],
+        results["M_ctrl"][:, 0],
+        label="commanded",
+        linestyle="--")
     plt.ylabel(r"$M_x (N \cdot m)$")
+    plt.legend()
     plt.subplot(312)
     plt.plot(results["times"], results["M_applied"][:, 1], label="applied")
-    plt.plot(results["times"], results["M_ctrl"][:, 1], label="commanded")
+    plt.plot(
+        results["times"],
+        results["M_ctrl"][:, 1],
+        label="commanded",
+        linestyle="--")
     plt.ylabel(r"$M_y (N \cdot m)$")
+    plt.legend()
     plt.subplot(313)
     plt.plot(results["times"], results["M_applied"][:, 2], label="applied")
-    plt.plot(results["times"], results["M_ctrl"][:, 2], label="commanded")
+    plt.plot(
+        results["times"],
+        results["M_ctrl"][:, 2],
+        label="commanded",
+        linestyle="--")
     plt.ylabel(r"$M_z (N \cdot m)$")
     plt.xlabel(r"Time (s)")
     plt.legend()
