@@ -14,7 +14,6 @@ def quaternion_multiply(q1, q2):
     Returns:
         numpy ndarray: the quaternion product of the quaternion multiplication
     """
-
     q3 = np.empty((4, ))
     q3[0:3] = q1[3] * q2[0:3] + q2[3] * q1[0:3] - cross(q1[0:3], q2[0:3])
     q3[3] = q1[3] * q2[3] - np.dot(q1[0:3], q2[0:3])
@@ -32,7 +31,6 @@ def quaternion_to_dcm(q):
         numpy ndarray: the equivalent (3x3) Direction Cosine Matrix for the
             attitude parameterized by the input quaternion
     """
-
     q1, q2, q3, q4 = q
     dcm = np.array([[
         q1**2 - q2**2 - q3**2 + q4**2, 2 * (q1 * q2 + q3 * q4),
@@ -58,7 +56,6 @@ def dcm_to_quaternion(dcm):
         numpy ndarray: the equivalent right-handed quaternion (4x1) with the 
             scalar part as the last entry
     """
-
     K = np.array([[
         dcm[0, 0] - dcm[1, 1] - dcm[2, 2], dcm[1, 0] + dcm[0, 1],
         dcm[2, 0] + dcm[0, 2], dcm[1, 2] - dcm[2, 1]
@@ -148,7 +145,6 @@ def cross(v1, v2):
     Returns:
         numpy ndarray: the cross product of the input vectors
     """
-
     v1_skew = skew_symmetric(v1)
     return np.matmul(v1_skew, v2)
 
@@ -162,7 +158,6 @@ def skew_symmetric(v):
     Returns:
         numpy ndarray: the skew-symmetric form of the vector (for purposes of cross-product computation)
     """
-
     return np.array([[0, -v[2], v[1]],
                      [v[2], 0, -v[0]],
                      [-v[1], v[0], 0]])
