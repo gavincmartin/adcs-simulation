@@ -9,7 +9,8 @@ class Actuators(object):
                  rxwl_radius,
                  w_rxwls=np.array([0, 0, 0]),
                  rxwl_max_torque=np.inf,
-                 noise_factor=0.01):
+                 rxwl_max_momentum=np.inf,
+                 noise_factor=0.0):
         """Constructs an object to store reaction wheel state and methods
         
         Args:
@@ -21,13 +22,14 @@ class Actuators(object):
             rxwl_max_torque (float, optional): Defaults to np.inf. The maximum
                 torque (N * m) that a given reaction wheel can apply. If
                 infinity, there is no limit.
-            noise_factor (float, optional): Defaults to 0.01. The standard
-                deviation of the Gaussian noise distribution centered at 0.
-                Used to apply noise to the actuation of control torques.
+            noise_factor (float, optional): Defaults to 0.0 (perfect).The
+                standard deviation of the Gaussian noise distribution centered
+                at 0. Used to apply noise to the actuation of control torques.
         """
         self.C_w = 0.5 * rxwl_mass * rxwl_radius**2
         self.w_rxwls = w_rxwls
         self.rxwl_max_torque = rxwl_max_torque
+        self.rxwl_max_momentum = rxwl_max_momentum
         noise_func = norm(loc=0.0, scale=noise_factor)
         self.noise_vals = np.array([
             noise_func.rvs(size=100000),
@@ -67,8 +69,19 @@ class Actuators(object):
         w_dot_rxwls[0] = self.add_noise(w_dot_rxwls[0], 0, t, delta_t)
         w_dot_rxwls[1] = self.add_noise(w_dot_rxwls[1], 1, t, delta_t)
         w_dot_rxwls[2] = self.add_noise(w_dot_rxwls[2], 2, t, delta_t)
+
+        for i, w_rxwl in enumerate(self.w_rxwls):
+            # if a wheel is saturated, we can no longer accelerate it above
+            # its maximum momentum
+            if ((self.C_w * w_rxwl < -self.rxwl_max_momentum
+                 and w_dot_rxwls[i] < 0)
+                    or (self.C_w * w_rxwl > self.rxwl_max_momentum
+                        and w_dot_rxwls[i] > 0)):
+                w_dot_rxwls[i] = 0.0
+
         M_applied = -self.C_w * w_dot_rxwls - cross(w_sc,
                                                     self.C_w * self.w_rxwls)
+
         return M_applied, w_dot_rxwls
 
     def add_noise(self, value, rxwl, t, delta_t):

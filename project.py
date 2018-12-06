@@ -39,16 +39,18 @@ def main():
     perfect_earth_horizon_sensor = EarthHorizonSensor(accuracy=0)
 
     # Sinclair Interplanetary 60 mNm-sec RXWLs
-    perfect_actuators = Actuators(
-        rxwl_mass=226e-3,
-        rxwl_radius=65e-3,
-        rxwl_max_torque=np.inf,
-        noise_factor=0.0)
     actuators = Actuators(
         rxwl_mass=226e-3,
         rxwl_radius=65e-3,
         rxwl_max_torque=20e-3,
+        rxwl_max_momentum=0.18,
         noise_factor=0.03)
+    perfect_actuators = Actuators(
+        rxwl_mass=226e-3,
+        rxwl_radius=65e-3,
+        rxwl_max_torque=np.inf,
+        rxwl_max_momentum=np.inf,
+        noise_factor=0.0)
 
     # define some orbital parameters
     mu_earth = 3.986004418e14
