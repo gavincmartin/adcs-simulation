@@ -48,13 +48,13 @@ def main():
     # Sinclair Interplanetary 60 mNm-sec RXWLs
     actuators = Actuators(
         rxwl_mass=226e-3,
-        rxwl_radius=65e-3,
+        rxwl_radius=0.5 * 65e-3,
         rxwl_max_torque=20e-3,
         rxwl_max_momentum=0.18,
         noise_factor=0.03)
     perfect_actuators = Actuators(
         rxwl_mass=226e-3,
-        rxwl_radius=65e-3,
+        rxwl_radius=0.5 * 65e-3,
         rxwl_max_torque=np.inf,
         rxwl_max_momentum=np.inf,
         noise_factor=0.0)
